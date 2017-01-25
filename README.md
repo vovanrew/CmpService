@@ -3,7 +3,8 @@
 This is a practice of implementing web RESTful microservice with AKKA, this work is modified from HumbleLu example (https://github.com/HumbleLu/scala-challenge.git).
 
 ####Main Changes:
-- compressor and decompressor services were transformed into actor model
+- compressor and decompressor services were transformed into actor model instead of class model
+- algorithm modified (program can compress and decompress all file content, not only one line as it was before)
 
 The compressing algorithm is based on the count of consecutive characters, for example: aaaabbc => a4-b2-c1 The algorithm is implemented in /src/main/scala/compressor, the compression related package
 

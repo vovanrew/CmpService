@@ -1,6 +1,7 @@
 package compressor
 
 import java.io._
+import scala.io.Source
 
 import akka.actor.{Actor, Props}
 
@@ -8,7 +9,6 @@ object Compressor {
   def props(input_file: String) = Props(classOf[Compressor], input_file)
 
   case object CntCompress
-  case object TODO
   case object CompresedFile
 }
 
@@ -21,13 +21,16 @@ class Compressor (input_file: String) extends Actor {
 
       def compressedFile = input_file + ".cmps"
 
-      def charCntCompressor(input_file: String): String = {
-        //read string
-        val input_string = scala.io.Source.fromFile(input_file).getLines.mkString.stripLineEnd
+      val inputFile = Source.fromFile(input_file)
 
-        //check format
+      val bw = new BufferedWriter(new FileWriter(new File(compressedFile)))
+
+      inputFile.getLines().foreach { input_string =>
+
         val m = input_string matches "[a-z0-9A-z]+"
+
         if (m == false) {
+          bw.close()
           throw new Exception("Format not match!")
         }
 
@@ -58,20 +61,16 @@ class Compressor (input_file: String) extends Actor {
             output += cnt
           }
         }
-        output
+
+        bw.write(output)
+        bw.newLine()
       }
 
-      val writeFile = {
-        val file = new File(compressedFile)
-        val bw = new BufferedWriter(new FileWriter(file))
-        bw.write(charCntCompressor(input_file))
-        bw.close()
-        sender() ! "compressed"
-      }
+      bw.close()
+      sender() ! "compressed"
     }
 
     case CompresedFile =>
       sender() ! input_file + ".cmps"
   }
-
 }

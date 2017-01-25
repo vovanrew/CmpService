@@ -3,13 +3,13 @@ package compressor
 import akka.actor.{Actor, Props}
 
 import java.io._
+import scala.io.Source
 
 object Decompressor {
 
   def props(imput_file: String) = Props(classOf[Decompressor], imput_file)
 
   case object CntDecompress
-  case object TODO
   case object DecompressedFile
 }
 
@@ -20,12 +20,13 @@ class Decompressor(input_file: String) extends Actor {
 
     case CntDecompress => {
 
-      val decompressedFile = input_file + ".dcmps"
+      def decompressedFile = input_file + ".dcmps"
 
-      def charCntDecompressor(input_file: String): String = {
-        //read string
-        val input_string = scala.io.Source.fromFile(input_file).getLines.mkString.stripLineEnd
+      val bw = new BufferedWriter(new FileWriter(new File(decompressedFile)))
 
+      val inputFile = scala.io.Source.fromFile(input_file)
+
+      inputFile.getLines().foreach { input_string =>
         //check format
         val m = input_string matches "([a-z0-9A-z][0-9]-)+([a-z0-9A-z][0-9])"
         if (m == false) {
@@ -43,16 +44,13 @@ class Decompressor(input_file: String) extends Actor {
         for (s <- input_string.split("-")) {
           output += restore(s)
         }
-        output
+
+        bw.write(output)
+        bw.newLine()
       }
 
-      val writeFile = {
-        val file = new File(decompressedFile)
-        val bw = new BufferedWriter(new FileWriter(file))
-        bw.write(charCntDecompressor(input_file))
-        bw.close()
-        sender() ! "decompressed"
-      }
+      bw.close()
+      sender() ! "decompressed"
     }
 
     case DecompressedFile =>
