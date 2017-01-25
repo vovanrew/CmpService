@@ -44,14 +44,16 @@ trait CompressService extends Protocols {
 
   def convert(compressReq: CompressReq)(implicit ec: ExecutionContext): Future[CompressReq] = Future {
     val compressor = system.actorOf(Compressor.props(compressReq.inputFile))
-    compressor ! CntCompress
+    val s = Await.result(compressor ? CntCompress, 5 seconds)
+    println("File " + s)
     system.stop(compressor)
     compressReq
   }
 
   def deconvert(decompressReq: DecompressReq)(implicit ec: ExecutionContext): Future[DecompressReq] = Future {
     val decompressor = system.actorOf(Decompressor.props(decompressReq.inputFile))
-    decompressor ! CntDecompress
+    val s = Await.result(decompressor ? CntDecompress, 5 seconds)
+    println("File " + s)
     system.stop(decompressor)
     decompressReq
   }

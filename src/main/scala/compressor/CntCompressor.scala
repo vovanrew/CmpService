@@ -66,6 +66,7 @@ class Compressor (input_file: String) extends Actor {
         val bw = new BufferedWriter(new FileWriter(file))
         bw.write(charCntCompressor(input_file))
         bw.close()
+        sender() ! "compressed"
       }
     }
 

@@ -51,6 +51,7 @@ class Decompressor(input_file: String) extends Actor {
         val bw = new BufferedWriter(new FileWriter(file))
         bw.write(charCntDecompressor(input_file))
         bw.close()
+        sender() ! "decompressed"
       }
     }
 
